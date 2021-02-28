@@ -26,6 +26,31 @@ def find_smallest_positive(xs):
     >>> find_smallest_positive([-3, -2, -1]) is None
     True
     '''
+    left = 0
+    right = len(xs) - 1
+
+    def go(left, right): 
+        mid = (left + right)//2
+        if xs[mid] == 0: # 0 the smallest positive 
+            return mid + 1
+        if left == right:
+            if xs[mid] > 0: 
+                return mid
+            else:
+                return None 
+
+        if xs[mid] > 0:
+            return go(left, mid - 1)
+        if xs[mid] < 0:
+            return go(mid + 1, right) 
+
+    if len(xs) == 0:
+        return None 
+
+    if xs[0] > 0:
+        return 0
+    else:
+        return go(left, right)
 
 
 def count_repeats(xs, x):
@@ -52,6 +77,48 @@ def count_repeats(xs, x):
     >>> count_repeats([3, 2, 1], 4)
     0
     '''
+    left = 0
+    right = len(xs) - 1
+
+    def first(left, right):
+        mid = (left + right) // 2
+        if xs[mid] == x:
+            if mid == 0 or xs[mid - 1] > x:
+                return mid
+            else:
+                return first(left, mid - 1)
+
+        if left == right:
+            return None 
+        if x > xs[mid]:
+            return first(left, mid - 1)
+        if x < xs[mid]:
+            return first(mid + 1, right)
+
+    def second(left, right):
+        mid = (left + right) // 2
+        if xs[mid] == x:
+            if mid == (len(xs) - 1) or x > xs[mid + 1]:
+                return mid
+            else:
+                return second(mid + 1, right)
+        if left == right:
+            return None
+        if xs[mid] > x:
+            return second(mid + 1, right)
+        if x > xs[mid]:
+            return second(left, mid - 1)
+
+    if len(xs) == 0:
+        return 0 
+    more = first(left, right)
+    less = second(left, right)
+
+    if more == None or less == None:
+        return 0 
+
+    else:
+        return less - more + 1
 
 
 def argmin(f, lo, hi, epsilon=1e-3):
@@ -69,24 +136,24 @@ def argmin(f, lo, hi, epsilon=1e-3):
                depending on which one is the smallest, 
                you recursively call your function on the interval [lo,m2] or [m1,hi]
 
-    APPLICATION:
-    Essentially all data mining algorithms are just this argmin implementation in disguise.
-    If you go on to take the data mining class (CS145/MATH166),
-    we will spend a lot of time talking about different f functions that can be minimized and their applications.
-    But the actual minimization code will all be a variant of this binary search.
-
-    WARNING:
-    The doctests below are not intended to pass on your code,
-    and are only given so that you have an example of what the output should look like.
-    Your output numbers are likely to be slightly different due to minor implementation details.
-    Writing tests for code that uses floating point numbers is notoriously difficult.
-    See the pytests for correct examples.
-
     >>> argmin(lambda x: (x-5)**2, -20, 20)
     5.000040370009773
     >>> argmin(lambda x: (x-5)**2, -20, 0)
     -0.00016935087808430278
     '''
+    def go(lo, hi):
+        m1 = lo + (hi - lo) / 4
+        m2 = lo + (hi - lo) / (1.3333)
+        
+        if (hi - lo) < epsilon:
+            return hi
+        if f(m1) > f(m2):
+            return go(m1, hi)
+        if f(m1) < f(m2):
+            return go(lo, m2)
+    return go(lo, hi)
+
+
 
 
 ################################################################################
